@@ -463,7 +463,7 @@ def run_game(
         if has_state:
             print_board(state)
 
-    while True:
+    while move_number < 50:
         # --- Check game over ---
         if has_state:
             over = _check_game_over(state, game_name, verbose)
@@ -554,7 +554,7 @@ def run_tournament(
     params: list[str] | None = None,
     engine1_params: list[str] | None = None,
     engine2_params: list[str] | None = None,
-) -> None:
+) -> float:
     """Run a tournament of N games, alternating colors."""
     engine1_wins = 0
     engine2_wins = 0
@@ -649,10 +649,12 @@ def run_tournament(
     print(f"  Engine1 ({algo1}): +{engine1_wins} -{engine2_wins} ={draws}")
     print(f"  Engine2 ({algo2}): +{engine2_wins} -{engine1_wins} ={draws}")
     print(f"  White wins: {white_wins}  Black wins: {black_wins}  Draws: {color_draws}")
+    e1_score = engine1_wins + draws * 0.5
     if total > 0:
-        e1_score = engine1_wins + draws * 0.5
         print(f"  Engine1 score: {e1_score}/{total} ({e1_score / total * 100:.1f}%)")
     print("=" * 50)
+
+    return e1_score
 
 
 def main() -> None:
