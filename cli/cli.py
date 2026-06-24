@@ -463,7 +463,16 @@ def run_game(
         if has_state:
             print_board(state)
 
-    while move_number < 50:
+    # Cap the game length so the loop always terminates.  Board games carry a
+    # step counter and self-adjudicate: State.check_game_over() settles the
+    # game by material count once `step` passes MAX_STEP (and also handles
+    # 4-fold repetition).  We must let `step` get past MAX_STEP for that to
+    # fire -- the old cap of 50 full moves stopped one move too early, so a
+    # game that reached the step limit silently returned None.  Generic games
+    # have no state, so they keep a fixed full-move cap.
+    move_cap = _game_ctx.get("max_step", 100) // 2 + 2 if has_state else 50
+
+    while move_number < move_cap:
         # --- Check game over ---
         if has_state:
             over = _check_game_over(state, game_name, verbose)
@@ -540,6 +549,12 @@ def run_game(
 
         if verbose and has_state:
             print_board(state)
+
+    # Loop hit the cap without a decisive result.  For board games this is
+    # unreachable (check_game_over adjudicates by material before the cap); it
+    # covers generic games (no adjudication) and guards callers from a None
+    # result.
+    return "draw"
 
 
 def run_tournament(
